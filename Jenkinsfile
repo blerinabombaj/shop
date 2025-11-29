@@ -52,22 +52,24 @@ pipeline {
             }
         }
         stage('Deploy Kubernetes') {
-            steps {
-                withCredentials([string(credentialsId: 'kubconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                    sh '''
-                        export PATH=$PATH:/usr/local/bin
-                        if ! command -v kubectl >/dev/null 2>&1; then
-                            echo "WARNING: kubectl not found - skipping"
-                            exit 0
-                        fi
-                        echo "$KUBECONFIG_CONTENT" > /tmp/kubeconfig
-                        export KUBECONFIG=/tmp/kubeconfig
-                        kubectl get nodes || true
-                    '''
-                }
-            }
+    steps {
+        withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
+            sh '''
+                export PATH=$PATH:/usr/local/bin
+
+                if ! command -v kubectl >/dev/null 2>&1; then
+                    echo "WARNING: kubectl not found - skipping"
+                    exit 0
+                fi
+
+                echo "Using kubeconfig at: $KUBECONFIG"
+                kubectl get nodes || true
+                kubectl apply -f k8s-deployment.yaml || true
+            '''
         }
     }
+}
+
     post {
         always {
             sh 'docker logout || true'

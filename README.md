@@ -1,9 +1,9 @@
-# xxxxx-project-name
+xxxxx-project-name
 npm install
 npm start
 Docker CI/CD test ✅
 
-## 🚀 PRODUCTION DEVOPS PIPELINE
+ PRODUCTION DEVOPS PIPELINE
 
 **Docker Hub:** hub.docker.com/r/digdigdigdig/shop 
 **K8s Live (port-forward):** localhost:8080  

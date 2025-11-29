@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        nodejs 'nodejs-18'  // Make sure this matches the NodeJS tool name in Jenkins global config
+        nodejs 'nodejs-18'
     }
     environment {
         PATH = "${tool 'nodejs-18'}/bin:${env.PATH}"
@@ -25,20 +25,23 @@ pipeline {
                 '''
             }
         }
+
         stage('List Files') {
             steps {
                 sh 'ls -la'
             }
         }
-       stage('Build Docker') {
-    steps {
-        sh '''
-            export PATH=$PATH:/usr/local/bin
-            docker build -t digdigdigdig/shop:${BUILD_NUMBER} .
-            docker tag digdigdigdig/shop:${BUILD_NUMBER} digdigdigdig/shop:latest
-        '''
-    }
-}
+
+        stage('Build Docker') {
+            steps {
+                sh '''
+                    export PATH=$PATH:/usr/local/bin
+                    docker build -t digdigdigdig/shop:${BUILD_NUMBER} .
+                    docker tag digdigdigdig/shop:${BUILD_NUMBER} digdigdigdig/shop:latest
+                '''
+            }
+        }
+
         stage('Push Docker') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -51,28 +54,30 @@ pipeline {
                 }
             }
         }
-    stage('Deploy Kubernetes') {
-    steps {
-        withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
-            sh '''
-                export PATH=$PATH:/usr/local/bin
 
-                if ! command -v kubectl >/dev/null 2>&1; then
-                    echo "WARNING: kubectl not found - skipping"
-                    exit 0
-                fi
+        stage('Deploy Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
+                    sh '''
+                        export PATH=$PATH:/usr/local/bin
 
-                echo "Using kubeconfig at: $KUBECONFIG"
-                kubectl get nodes || true
-                kubectl apply -f k8s-deployment.yaml || true
-            '''
+                        if ! command -v kubectl >/dev/null 2>&1; then
+                            echo "WARNING: kubectl not found - skipping"
+                            exit 0
+                        fi
+
+                        echo "Using kubeconfig at: $KUBECONFIG"
+                        kubectl get nodes || true
+                        kubectl apply -f k8s-deployment.yaml || true
+                    '''
+                }
+            }
         }
-    }
-}
-        
-   post {
+    }  // <- closes stages
+
+    post {
         always {
             sh 'docker logout || true'
         }
     }
-}
+}  // <- closes pipeline

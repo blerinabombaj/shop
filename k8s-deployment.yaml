@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{shop}}
+  name: shop
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: {{shop}}
+      app: shop
   template:
     metadata:
       labels:
-        app: {{shop}}
+        app: shop
     spec:
       containers:
-      - name: {{shop}}
-        image: {{digdigdigdig/shop:latest}}
+      - name: shop
+        image: digdigdigdig/shop:latest
         ports:
         - containerPort: 3000
 ---
@@ -24,7 +24,7 @@ metadata:
   name: shop-service
 spec:
   selector:
-    app: {{shop}}
+    app: shop
   ports:
   - port: 80
     targetPort: 3000

@@ -51,7 +51,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Kubernetes') {
+    stage('Deploy Kubernetes') {
     steps {
         withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
             sh '''
@@ -69,8 +69,8 @@ pipeline {
         }
     }
 }
-
-    post {
+        
+   post {
         always {
             sh 'docker logout || true'
         }
